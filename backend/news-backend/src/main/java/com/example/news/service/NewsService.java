@@ -12,7 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,6 +26,8 @@ public class NewsService {
 
     private final NewsRepository newsRepository;
 
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
     /**
      * 获取轮播图新闻
      */
@@ -33,28 +35,25 @@ public class NewsService {
     public List<NewsDTO> getCarouselNews() {
         Pageable pageable = PageRequest.of(0, 5, Sort.by("carouselOrder").ascending());
         List<News> carouselList = newsRepository.findByIsCarouselTrueOrderByCarouselOrderAsc(pageable);
+        log.info("获取轮播图新闻：{}", carouselList);
         return carouselList.stream().map(this::convertToDTO).collect(Collectors.toList());
     }
-
     /**
      * 获取首页推荐新闻
      */
     @Transactional(readOnly = true)
-    public PageResult<NewsDTO> getRecommendNews(String type, int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("publishedAt").descending());
-        
-        News.NewsType newsType;
-        try {
-            newsType = News.NewsType.valueOf(type.toUpperCase());
-        } catch (Exception e) {
-            newsType = News.NewsType.DOMESTIC;
-        }
+    public PageResult<NewsDTO> getRecommendNews(News.NewsType type, int page, int size) {
 
-        Page<News> newsPage = newsRepository.findByType(newsType, pageable);
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("publishedAt").descending());
+
+        Page<News> newsPage = newsRepository.findByType(type, pageable);
+
+        // 3. 转换 DTO
         List<NewsDTO> dtoList = newsPage.getContent().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
 
+        // 4. 返回分页结果
         return PageResult.of(dtoList, newsPage.getTotalElements(), page, size);
     }
 
@@ -123,13 +122,22 @@ public class NewsService {
      * 实体转 DTO
      */
     private NewsDTO convertToDTO(News news) {
+        if (news == null) {
+            return null;
+        }
+
         NewsDTO dto = new NewsDTO();
         dto.setId(news.getId());
         dto.setTitle(news.getTitle());
         dto.setSummary(news.getSummary());
         dto.setContent(news.getContent());
         dto.setCoverImage(news.getCoverImage());
-        dto.setType(news.getType().name());
+
+        // 枚举转字符串
+        if (news.getType() != null) {
+            dto.setType(news.getType().name());
+        }
+
         dto.setProvince(news.getProvince());
         dto.setRegion(news.getRegion());
         dto.setCountry(news.getCountry());
@@ -138,12 +146,16 @@ public class NewsService {
         dto.setAuthor(news.getAuthor());
         dto.setViewCount(news.getViewCount());
         dto.setIsCarousel(news.getIsCarousel());
+
+        // 优化日期格式：使用 formatter 替代 toString()
         if (news.getCreatedAt() != null) {
-            dto.setCreatedAt(news.getCreatedAt().toString());
+            dto.setCreatedAt(news.getCreatedAt().format(FORMATTER));
         }
+
         if (news.getPublishedAt() != null) {
-            dto.setPublishedAt(news.getPublishedAt().toString());
+            dto.setPublishedAt(news.getPublishedAt().format(FORMATTER));
         }
+
         return dto;
     }
 }

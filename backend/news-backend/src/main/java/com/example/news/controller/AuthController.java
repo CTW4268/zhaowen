@@ -1,6 +1,7 @@
 package com.example.news.controller;
 
 import com.example.news.dto.request.LoginRequest;
+import com.example.news.dto.request.RefreshTokenRequest;
 import com.example.news.dto.request.RegisterRequest;
 import com.example.news.dto.response.ApiResponse;
 import com.example.news.dto.response.LoginResponse;
@@ -11,13 +12,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * 认证控制器
- */
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
-@Tag(name = "用户认证", description = "用户登录、注册相关接口")
+@Tag(name = "用户认证", description = "用户登录、注册、Token刷新相关接口")
 public class AuthController {
 
     private final AuthService authService;
@@ -41,6 +39,17 @@ public class AuthController {
             return ApiResponse.success(response);
         } catch (Exception e) {
             return ApiResponse.error(401, "用户名或密码错误");
+        }
+    }
+
+    @PostMapping("/refresh")
+    @Operation(summary = "刷新Token")
+    public ApiResponse<LoginResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+        try {
+            LoginResponse response = authService.refreshToken(request.getRefreshToken());
+            return ApiResponse.success(response);
+        } catch (Exception e) {
+            return ApiResponse.error(401, e.getMessage());
         }
     }
 }

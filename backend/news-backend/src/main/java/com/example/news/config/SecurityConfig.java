@@ -20,9 +20,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-/**
- * Spring Security 配置类
- */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -37,19 +34,22 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // 公开接口
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/news/**").permitAll()
                         .requestMatchers("/help/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        // 需要认证的接口
+
+                        .requestMatchers(HttpMethod.GET, "/news/carousel").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/news/recommend").permitAll()
+
+                        .requestMatchers("/news/**").authenticated()
+
                         .requestMatchers("/favorites/**").authenticated()
                         .requestMatchers("/history/**").authenticated()
                         .requestMatchers("/user/**").authenticated()
-                        // 其他请求
+
                         .anyRequest().permitAll()
                 )
-                .sessionManagement(session -> 
+                .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
@@ -65,7 +65,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) 
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
             throws Exception {
         return config.getAuthenticationManager();
     }

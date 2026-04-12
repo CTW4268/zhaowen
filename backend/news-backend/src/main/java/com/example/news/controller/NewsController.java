@@ -3,18 +3,21 @@ package com.example.news.controller;
 import com.example.news.dto.response.ApiResponse;
 import com.example.news.dto.response.NewsDTO;
 import com.example.news.dto.response.PageResult;
+import com.example.news.entity.News;
 import com.example.news.service.HistoryService;
 import com.example.news.service.NewsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * 新闻控制器
- */
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
 @RequestMapping("/news")
 @RequiredArgsConstructor
@@ -23,20 +26,32 @@ public class NewsController {
 
     private final NewsService newsService;
     private final HistoryService historyService;
+    private static final Logger log = LoggerFactory.getLogger(NewsController.class);
 
     @GetMapping("/carousel")
     @Operation(summary = "获取轮播图新闻")
-    public ApiResponse<?> getCarouselNews() {
-        return ApiResponse.success(newsService.getCarouselNews());
+    public ApiResponse<List<NewsDTO>> getCarouselNews() {
+        List<NewsDTO> carouselList = newsService.getCarouselNews();
+        return ApiResponse.success(carouselList);
     }
 
     @GetMapping("/recommend")
     @Operation(summary = "获取首页推荐新闻")
     public ApiResponse<PageResult<NewsDTO>> getRecommendNews(
-            @RequestParam(defaultValue = "domestic") String type,
+            @RequestParam(required = false, defaultValue = "domestic") String type,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
-        return ApiResponse.success(newsService.getRecommendNews(type, page, size));
+
+        News.NewsType newsType;
+        try {
+            newsType = News.NewsType.valueOf(type.toUpperCase());
+        } catch (Exception e) {
+            newsType = News.NewsType.DOMESTIC;
+        }
+
+        PageResult<NewsDTO> result = newsService.getRecommendNews(newsType, page, size);
+
+        return ApiResponse.success(result);
     }
 
     @GetMapping("/domestic")
@@ -46,6 +61,7 @@ public class NewsController {
             @RequestParam(required = false) String category,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
+
         return ApiResponse.success(newsService.getDomesticNews(province, category, page, size));
     }
 
@@ -70,21 +86,20 @@ public class NewsController {
 
     @GetMapping("/{id}")
     @Operation(summary = "获取新闻详情")
-    public ApiResponse<NewsDTO> getNewsDetail(@PathVariable Long id,
-                                               @AuthenticationPrincipal UserDetails userDetails) {
+    public ApiResponse<NewsDTO> getNewsDetail(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
         NewsDTO news = newsService.getNewsById(id);
-        
-        // 如果已登录，自动记录阅读历史
+
         if (userDetails != null) {
             try {
                 Long userId = Long.parseLong(userDetails.getUsername());
-                historyService.addHistory(userId, id, news.getTitle(), 
-                        news.getType(), news.getCategory());
+                historyService.addHistory(userId, id, news.getTitle(), news.getType(), news.getCategory());
             } catch (Exception e) {
-                // 记录历史失败不影响返回新闻
+                log.warn("记录阅读历史失败，用户: {}, 新闻ID: {}", userDetails.getUsername(), id);
             }
         }
-        
+
         return ApiResponse.success(news);
     }
 }

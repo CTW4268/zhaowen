@@ -2,9 +2,6 @@ package com.example.news.dto.response;
 
 import lombok.Data;
 
-/**
- * 登录响应 DTO
- */
 @Data
 public class LoginResponse {
 
@@ -12,14 +9,16 @@ public class LoginResponse {
     private String username;
     private String avatar;
     private String token;
+    private String refreshToken;
 
     public LoginResponse() {
     }
 
-    public LoginResponse(Long id, String username, String avatar, String token) {
+    public LoginResponse(Long id, String username, String avatar, String token, String refreshToken) {
         this.id = id;
         this.username = username;
         this.avatar = avatar;
         this.token = token;
+        this.refreshToken = refreshToken;
     }
 }
