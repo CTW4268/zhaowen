@@ -1,0 +1,1 @@
+docker logs 1Panel-manticoresearch-JR8t | grep -iE "cuda|onnx|gpu|provider"

@@ -1,0 +1,682 @@
+<template>
+     <!-- ==================== 新增顶部导航栏 ==================== -->
+    <nav class="top-nav">
+        <!-- 左侧汉堡菜单 -->
+        <div class="nav-left">
+            <div class="menu-toggle" id="menuToggle">
+                <div class="menu-line"></div>
+                <div class="menu-line"></div>
+                <div class="menu-line"></div>
+            </div>
+            <div class="dropdown-menu" id="dropdownMenu">
+                <a href="#">首页推荐</a>
+                <router-link to="/favorites">个人收藏</router-link>
+                <router-link to="/history">阅读历史</router-link>
+                <router-link to="/help">帮助中心</router-link>
+                <router-link to="/feedback">帮助反馈</router-link>
+            </div>
+
+            <!-- 国内菜单按钮靠近新闻中心左侧 -->
+            <router-link to="/domestic" class="nav-link nav-domestic">国内</router-link>
+        </div>
+
+        <!-- 中间标题 -->
+        <div class="nav-center">
+            <h2 class="nav-title">新闻中心</h2>
+        </div>
+
+        <!-- 右侧导航链接 -->
+        <div class="nav-right">
+            <div class="nav-links nav-links-right">
+                <router-link to="/overseas" class="nav-link">海外</router-link>
+            </div>
+
+            <div class="nav-user">
+              <span class="nav-username" v-if="user">{{ user }}</span>
+              <div class="user-icon" id="userIcon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+              </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 原有头部标题：艺术字体效果 -->
+    <header class="header">
+        <h1 class="main-title">朝闻天下事</h1>
+    </header>
+
+    <!-- 主内容容器 -->
+    <main class="container">
+        <!-- 轮播图模块（已因顶部导航栏而下移） -->
+        <section class="carousel-section">
+            <div class="carousel-wrapper">
+                <div class="carousel-placeholder">
+                    [近期国内外大事图片轮播区域]
+                </div>
+            </div>
+        </section>
+
+        <!-- 双栏布局：国内精选 + 海外热点 -->
+        <section class="dual-column-section">
+            <!-- 国内精选 -->
+            <div class="column-block">
+                <h2 class="column-title">国内精选</h2>
+                <div class="news-list">
+                    <article class="news-item">
+                        <img src="https://via.placeholder.com/140x90/FF6B6B/FFFFFF?text=国内新闻1" alt="国内新闻" class="news-image">
+                        <div class="news-content">
+                            <h3 class="news-title"><a href="#">国内重要政策发布：多领域迎来新发展机遇</a></h3>
+                            <p class="news-desc">最新政策解读，涵盖经济、科技、民生等多个方面，为未来发展指明方向...</p>
+                        </div>
+                    </article>
+                    <article class="news-item">
+                        <img src="https://via.placeholder.com/140x90/4ECDC4/FFFFFF?text=国内新闻2" alt="国内新闻" class="news-image">
+                        <div class="news-content">
+                            <h3 class="news-title"><a href="#">科技创新取得重大突破：引领行业发展新趋势</a></h3>
+                            <p class="news-desc">国内科研团队在国际顶尖期刊发表重要成果，获得业界高度认可...</p>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <!-- 海外热点 -->
+            <div class="column-block">
+                <h2 class="column-title">海外热点</h2>
+                <div class="news-list">
+                    <article class="news-item">
+                        <img src="https://via.placeholder.com/140x90/45B7D1/FFFFFF?text=海外热点1" alt="海外新闻" class="news-image">
+                        <div class="news-content">
+                            <h3 class="news-title"><a href="#">国际关系新动态：多国加强合作交流</a></h3>
+                            <p class="news-desc">最新外交活动频繁，国际合作项目持续推进，为全球发展注入新动力...</p>
+                        </div>
+                    </article>
+                    <article class="news-item">
+                        <img src="https://via.placeholder.com/140x90/F7DC6F/FFFFFF?text=海外热点2" alt="海外新闻" class="news-image">
+                        <div class="news-content">
+                            <h3 class="news-title"><a href="#">全球经济形势分析：市场呈现新特征</a></h3>
+                            <p class="news-desc">国际金融机构发布最新报告，对全球经济发展趋势进行深入解读...</p>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- 政治大事件展示区域 -->
+        <section class="politics-section">
+            <h2 class="column-title">近期国内外政治大事件展示</h2>
+            <div class="politics-grid">
+                <article class="politics-card">
+                    <img src="https://via.placeholder.com/400x300/BB8FCE/FFFFFF?text=政治事件1" alt="政治事件">
+                    <div class="politics-card-content">
+                        <h3 class="news-title"><a href="#">重要国际会议圆满落幕：达成多项共识</a></h3>
+                        <p class="news-desc">会议就全球治理、气候变化等议题进行深入讨论，发布联合声明...</p>
+                    </div>
+                </article>
+                <article class="politics-card">
+                    <img src="https://via.placeholder.com/400x300/85C1E2/FFFFFF?text=政治事件2" alt="政治事件">
+                    <div class="politics-card-content">
+                        <h3 class="news-title"><a href="#">双边关系迈上新台阶：签署系列合作协议</a></h3>
+                        <p class="news-desc">两国领导人会晤，就深化各领域合作达成共识，开启关系新篇章...</p>
+                    </div>
+                </article>
+                <article class="politics-card">
+                    <img src="https://via.placeholder.com/400x300/F8B195/FFFFFF?text=政治事件3" alt="政治事件">
+                    <div class="politics-card-content">
+                        <h3 class="news-title"><a href="#">地区局势出现积极变化：和平进程稳步推进</a></h3>
+                        <p class="news-desc">多方对话机制启动，地区紧张局势缓解，重建工作有序展开...</p>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <!-- 登录弹窗（全局可用） -->
+    <div class="login-modal" id="loginModal" aria-hidden="true">
+      <div class="login-modal-backdrop" id="loginModalBackdrop"></div>
+      <div class="login-modal-content" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle">
+        <button class="login-close" id="loginModalClose" aria-label="关闭登录窗口">×</button>
+        <h2 id="loginModalTitle">用户登录</h2>
+        <form class="login-form" id="loginForm">
+          <label>
+            账号
+            <input type="text" name="username" placeholder="请输入用户名" required />
+          </label>
+          <label>
+            密码
+            <input type="password" name="password" placeholder="请输入密码" required />
+          </label>
+          <button type="submit" class="login-submit">登录</button>
+        </form>
+        <div class="login-footer">
+          <small>还没有账号？<a href="#" id="registerLink">立即注册</a></small>
+        </div>
+      </div>
+    </div>
+
+    <!-- 底部信息区域 -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-info">
+                新闻来源：<a href="https://www.example.com" target="_blank">XXXXXXXXXXXX</a>
+            </div>
+            <div class="footer-info">
+                <a href="mailto:contact@example.com">联系我们</a> | <a href="#">关于我们</a> | <a href="#">版权声明</a>
+            </div>
+        </div>
+    </footer>
+</template>
+<script setup lang="ts">
+import { onMounted } from 'vue'
+import { useAuth } from '@/composables/useAuth'
+
+// 统一登录状态
+const { user, login } = useAuth()
+
+// 所有DOM操作必须放在onMounted中，确保元素已渲染
+onMounted(() => {
+  const menuToggle = document.getElementById('menuToggle')
+  const dropdownMenu = document.getElementById('dropdownMenu')
+  let menuOpen = false
+
+  // 用可选链?.确保元素存在时才执行事件绑定
+  menuToggle?.addEventListener('click', function(e) {
+    e.stopPropagation()
+    menuOpen = !menuOpen
+    dropdownMenu?.classList.toggle('active', menuOpen)
+  })
+
+  // 点击页面其他地方关闭下拉菜单
+  document.addEventListener('click', function() {
+    menuOpen = false
+    dropdownMenu?.classList.remove('active')
+  })
+
+  // 登录模态相关元素
+  const userIcon = document.getElementById('userIcon')
+  const loginModal = document.getElementById('loginModal')
+  const loginModalBackdrop = document.getElementById('loginModalBackdrop')
+  const loginModalClose = document.getElementById('loginModalClose')
+  const loginForm = document.getElementById('loginForm') as HTMLFormElement | null
+  const registerLink = document.getElementById('registerLink')
+
+  const openLoginModal = () => {
+    loginModal?.classList.add('active')
+    loginModal?.setAttribute('aria-hidden', 'false')
+  }
+
+  const closeLoginModal = () => {
+    loginModal?.classList.remove('active')
+    loginModal?.setAttribute('aria-hidden', 'true')
+  }
+
+  userIcon?.addEventListener('click', () => {
+    openLoginModal()
+  })
+  loginModalBackdrop?.addEventListener('click', closeLoginModal)
+  loginModalClose?.addEventListener('click', closeLoginModal)
+
+  loginForm?.addEventListener('submit', function (e) {
+    e.preventDefault()
+    const formData = new FormData(this)
+    const username = (formData.get('username') as string) || '用户'
+    login(username)
+    alert(`登录完成：${username}`)
+    closeLoginModal()
+  })
+
+  registerLink?.addEventListener('click', function (e) {
+    e.preventDefault()
+    // 跳转到内部注册页面
+    window.location.href = '/register'
+  })
+})
+</script>
+
+<style scoped>
+  /* 登录模态 */
+  .login-modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+  }
+
+  .login-modal.active {
+    display: flex;
+  }
+
+  .login-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+  }
+
+  .login-modal-content {
+    position: relative;
+    width: min(420px, calc(100% - 40px));
+    padding: 28px 26px;
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .login-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 34px;
+    height: 34px;
+    border: none;
+    background: rgba(0, 0, 0, 0.06);
+    border-radius: 50%;
+    font-size: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+
+  .login-close:hover {
+    background: rgba(0, 0, 0, 0.15);
+  }
+
+  .login-modal h2 {
+    margin: 0;
+    font-size: 24px;
+    text-align: center;
+    color: #2c3e50;
+  }
+
+  .login-form {
+    display: grid;
+    gap: 14px;
+  }
+
+  .login-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-weight: 600;
+    color: #2c3e50;
+  }
+
+  .login-form input {
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #d9d9d9;
+    font-size: 15px;
+    background: #fafafa;
+  }
+
+  .login-form input:focus {
+    outline: none;
+    border-color: #c41e3a;
+    box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.14);
+  }
+
+  .login-submit {
+    padding: 14px 0;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .login-submit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 20px rgba(196, 30, 58, 0.4);
+  }
+
+  .login-footer {
+    text-align: center;
+    color: #667;
+    font-size: 13px;
+  }
+
+  .login-footer a {
+    color: #c41e3a;
+    text-decoration: none;
+  }
+
+  .login-footer a:hover {
+    text-decoration: underline;
+  }
+  /* ==================== 原有头部标题区域 ==================== */
+  .header {
+    background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
+    padding: 28px 0;
+    text-align: center;
+    margin-bottom: var(--module-gap);
+    margin-top: 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .main-title {
+    font-family: 'Long Cang', 'Ma Shan Zheng', 'STKaiti', 'KaiTi', 'SimKai', serif;
+    font-size: 46px;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: 8px;
+    text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+  }
+
+  /* ==================== 轮播图模块 ==================== */
+  .carousel-section {
+    margin-bottom: var(--module-gap);
+  }
+
+  .carousel-wrapper {
+    background: #ffffff;
+    border-radius: 14px;
+    overflow: hidden;
+    height: 220px; /* 缩减轮播图高度 */
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    position: relative;
+  }
+
+  .carousel-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(45deg, #e3f2fd 0%, #f3e5f5 100%);
+    color: #7f8c8d;
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+  /* ==================== 双栏内容区域 ==================== */
+  .dual-column-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* PC 端双列 */
+    gap: var(--column-gap);
+    margin-bottom: var(--section-gap);
+  }
+
+  .column-block {
+    background: #ffffff;
+    padding: 28px;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  }
+
+  .column-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: #c41e3a;
+    margin-bottom: var(--item-gap);
+    padding-bottom: 12px;
+    border-bottom: 3px solid #c41e3a;
+  }
+
+  /* 新闻条目 */
+  .news-item {
+    display: flex; /* PC 端水平 */
+    gap: var(--inner-gap);
+    margin-bottom: var(--item-gap);
+    padding-bottom: var(--item-gap);
+    border-bottom: 1px solid #ecf0f1;
+  }
+
+  .news-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .news-image {
+    width: 160px; /* PC 端增大 */
+    height: 100px; /* PC 端增大 */
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .news-content {
+    flex: 1;
+  }
+
+  .news-title {
+    font-size: 20px; /* PC 端增大 */
+    font-weight: 600;
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+
+  .news-title a {
+    color: #2c3e50;
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+
+  .news-title a:hover {
+    color: #c41e3a;
+  }
+
+  .news-desc {
+    font-size: 16px; /* PC 端增大 */
+    color: #7f8c8d;
+    line-height: 1.6;
+  }
+
+  /* ==================== 政治事件展示区域 ==================== */
+  .politics-section {
+    background: #ffffff;
+    padding: 40px; /* PC 端增大 */
+    border-radius: 16px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    margin-bottom: var(--module-gap);
+  }
+
+  .politics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* PC 端3列 */
+    gap: var(--item-gap);
+  }
+
+  .politics-card {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+
+  .politics-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  }
+
+  .politics-card img {
+    width: 100%;
+    height: 220px; /* PC 端增大 */
+    object-fit: cover;
+  }
+
+  .politics-card-content {
+    padding: var(--inner-gap);
+  }
+
+  /* ==================== 底部区域 ==================== */
+  /* ==================== 响应式调整 ==================== */
+  @media (min-width: 769px) {
+    /* PC 端明确定义，确保比例正确 */
+    body {
+      font-size: 16px;
+    }
+    .dual-column-section {
+      grid-template-columns: 1fr 1fr;
+    }
+    .politics-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (max-width: 1200px) {
+    .politics-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  /* 手机端：单列、紧凑、新闻卡片式 */
+  @media (max-width: 768px) {
+    .header {
+      padding: 16px 0;
+    }
+    .main-title {
+      font-size: 26px;
+      letter-spacing: 2px;
+    }
+    .carousel-section {
+      margin-bottom: 20px;
+    }
+    .carousel-wrapper {
+      height: 160px; /* 缩减移动端轮播图 */
+      border-radius: 12px;
+    }
+    .carousel-placeholder {
+      font-size: 15px;
+    }
+    .dual-column-section {
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .column-block {
+      padding: 16px;
+      border-radius: 12px;
+    }
+    .column-title {
+      font-size: 20px;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+    }
+    .news-item {
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+    }
+    .news-item:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    .news-image {
+      width: 100%;
+      height: 160px;
+      border-radius: 8px;
+    }
+    .news-title {
+      font-size: 17px;
+    }
+    .news-title a {
+      display: block;
+    }
+    .news-desc {
+      font-size: 14px;
+    }
+    .politics-section {
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+    .politics-section .column-title {
+      font-size: 20px;
+      margin-bottom: 14px;
+    }
+    .politics-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    .politics-card {
+      border-radius: 10px;
+    }
+    .politics-card img {
+      height: 180px;
+    }
+    .politics-card-content {
+      padding: 14px;
+    }
+    .politics-card-content .news-title {
+      font-size: 16px;
+    }
+    .politics-card-content .news-desc {
+      font-size: 14px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .header {
+      padding: 12px 0;
+    }
+    .main-title {
+      font-size: 22px;
+      letter-spacing: 1px;
+    }
+    .carousel-wrapper {
+      height: 150px; /* 进一步缩减小屏轮播图 */
+    }
+    .column-block {
+      padding: 12px;
+    }
+    .column-title {
+      font-size: 18px;
+    }
+    .news-image {
+      height: 140px;
+    }
+    .news-title {
+      font-size: 16px;
+    }
+    .news-desc {
+      font-size: 13px;
+    }
+    .politics-section {
+      padding: 12px;
+    }
+    .politics-card img {
+      height: 160px;
+    }
+    .politics-card-content {
+      padding: 12px;
+    }
+  }
+
+  /* PC 端放大一些间距和字体 */
+  @media (min-width: 1400px) {
+    :root {
+      --module-gap: 80px;
+      --column-gap: 50px;
+      --item-gap: 35px;
+      --inner-gap: 30px;
+    }
+
+    .main-title {
+      font-size: 72px;
+      letter-spacing: 20px;
+    }
+
+    .carousel-wrapper {
+      height: 340px;
+    }
+
+    .column-title {
+      font-size: 42px;
+    }
+  }
+</style>
