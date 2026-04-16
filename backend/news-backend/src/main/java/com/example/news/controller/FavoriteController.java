@@ -52,7 +52,7 @@ public class FavoriteController {
         try {
             Long userId = getUserId(userDetails);
             favoriteService.addFavorite(userId, request.getNewsId(), request.getType(),
-                    request.getNewsTitle(), request.getNewsCover());
+                    request.getNewsTitle());
             return ApiResponse.success();
         } catch (Exception e) {
             return ApiResponse.error(400, e.getMessage());

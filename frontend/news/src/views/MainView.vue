@@ -1,4 +1,13 @@
 <template>
+    <!-- 消息提示 -->
+    <Message
+      v-if="errorMessage"
+      :type="messageType"
+      :message="errorMessage"
+      :duration="3000"
+      @close="errorMessage = ''"
+    />
+
      <!-- ==================== 新增顶部导航栏 ==================== -->
     <nav class="top-nav">
         <!-- 左侧汉堡菜单 -->
@@ -52,9 +61,16 @@
         <!-- 轮播图模块（已因顶部导航栏而下移） -->
         <section class="carousel-section">
             <div class="carousel-wrapper">
-                <div class="carousel-placeholder">
-                    [近期国内外大事图片轮播区域]
+                <div v-if="loading" class="carousel-placeholder">加载中...</div>
+                <div v-else-if="allNews.length > 0" class="carousel-container">
+                    <div v-for="(item, index) in allNews" :key="item.id" class="carousel-item">
+                        <div class="carousel-caption">
+                            <h3>{{ item.title }}</h3>
+                            <p>{{ item.summary }}</p>
+                        </div>
+                    </div>
                 </div>
+                <div v-else class="carousel-placeholder">暂无轮播新闻</div>
             </div>
         </section>
 
@@ -63,72 +79,47 @@
             <!-- 国内精选 -->
             <div class="column-block">
                 <h2 class="column-title">国内精选</h2>
-                <div class="news-list">
-                    <article class="news-item">
-                        <img src="https://via.placeholder.com/140x90/FF6B6B/FFFFFF?text=国内新闻1" alt="国内新闻" class="news-image">
-                        <div class="news-content">
-                            <h3 class="news-title"><a href="#">国内重要政策发布：多领域迎来新发展机遇</a></h3>
-                            <p class="news-desc">最新政策解读，涵盖经济、科技、民生等多个方面，为未来发展指明方向...</p>
-                        </div>
-                    </article>
-                    <article class="news-item">
-                        <img src="https://via.placeholder.com/140x90/4ECDC4/FFFFFF?text=国内新闻2" alt="国内新闻" class="news-image">
-                        <div class="news-content">
-                            <h3 class="news-title"><a href="#">科技创新取得重大突破：引领行业发展新趋势</a></h3>
-                            <p class="news-desc">国内科研团队在国际顶尖期刊发表重要成果，获得业界高度认可...</p>
-                        </div>
-                    </article>
+                <div v-if="loading" class="news-list">加载中...</div>
+                <div v-else-if="domesticNews.length > 0" class="news-list">
+                    <NewsCard
+                      v-for="item in domesticNews"
+                      :key="item.id"
+                      :news="item"
+                      :show-actions="true"
+                    />
                 </div>
+                <div v-else class="news-list">暂无国内新闻</div>
             </div>
 
             <!-- 海外热点 -->
             <div class="column-block">
                 <h2 class="column-title">海外热点</h2>
-                <div class="news-list">
-                    <article class="news-item">
-                        <img src="https://via.placeholder.com/140x90/45B7D1/FFFFFF?text=海外热点1" alt="海外新闻" class="news-image">
-                        <div class="news-content">
-                            <h3 class="news-title"><a href="#">国际关系新动态：多国加强合作交流</a></h3>
-                            <p class="news-desc">最新外交活动频繁，国际合作项目持续推进，为全球发展注入新动力...</p>
-                        </div>
-                    </article>
-                    <article class="news-item">
-                        <img src="https://via.placeholder.com/140x90/F7DC6F/FFFFFF?text=海外热点2" alt="海外新闻" class="news-image">
-                        <div class="news-content">
-                            <h3 class="news-title"><a href="#">全球经济形势分析：市场呈现新特征</a></h3>
-                            <p class="news-desc">国际金融机构发布最新报告，对全球经济发展趋势进行深入解读...</p>
-                        </div>
-                    </article>
+                <div v-if="loading" class="news-list">加载中...</div>
+                <div v-else-if="overseasNews.length > 0" class="news-list">
+                    <NewsCard
+                      v-for="item in overseasNews"
+                      :key="item.id"
+                      :news="item"
+                      :show-actions="true"
+                    />
                 </div>
+                <div v-else class="news-list">暂无海外新闻</div>
             </div>
         </section>
 
         <!-- 政治大事件展示区域 -->
         <section class="politics-section">
             <h2 class="column-title">近期国内外政治大事件展示</h2>
-            <div class="politics-grid">
-                <article class="politics-card">
-                    <img src="https://via.placeholder.com/400x300/BB8FCE/FFFFFF?text=政治事件1" alt="政治事件">
-                    <div class="politics-card-content">
-                        <h3 class="news-title"><a href="#">重要国际会议圆满落幕：达成多项共识</a></h3>
-                        <p class="news-desc">会议就全球治理、气候变化等议题进行深入讨论，发布联合声明...</p>
-                    </div>
-                </article>
-                <article class="politics-card">
-                    <img src="https://via.placeholder.com/400x300/85C1E2/FFFFFF?text=政治事件2" alt="政治事件">
-                    <div class="politics-card-content">
-                        <h3 class="news-title"><a href="#">双边关系迈上新台阶：签署系列合作协议</a></h3>
-                        <p class="news-desc">两国领导人会晤，就深化各领域合作达成共识，开启关系新篇章...</p>
-                    </div>
-                </article>
-                <article class="politics-card">
-                    <img src="https://via.placeholder.com/400x300/F8B195/FFFFFF?text=政治事件3" alt="政治事件">
-                    <div class="politics-card-content">
-                        <h3 class="news-title"><a href="#">地区局势出现积极变化：和平进程稳步推进</a></h3>
-                        <p class="news-desc">多方对话机制启动，地区紧张局势缓解，重建工作有序展开...</p>
-                    </div>
-                </article>
+            <div v-if="loading" class="politics-grid">加载中...</div>
+            <div v-else-if="allNews.length > 0" class="politics-grid">
+                <NewsCard
+                  v-for="item in allNews"
+                  :key="item.id"
+                  :news="item"
+                  :show-actions="true"
+                />
             </div>
+            <div v-else class="politics-grid">暂无政治新闻</div>
         </section>
     </main>
 
@@ -168,14 +159,73 @@
     </footer>
 </template>
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
+import { getDomesticNews, getOverseasNews, getAllNews } from '@/api/news'
+import type { NewsDTO } from '@/api/news'
+import NewsCard from '@/components/NewsCard.vue'
+import Message from '@/components/Message.vue'
 
+const router = useRouter()
 // 统一登录状态
-const { user, login } = useAuth()
+const { user, login, logout } = useAuth()
+
+// 响应式数据
+const domesticNews = ref<NewsDTO[]>([])
+const overseasNews = ref<NewsDTO[]>([])
+const allNews = ref<NewsDTO[]>([])
+const loading = ref(false)
+const errorMessage = ref('')
+const messageType = ref<'success' | 'error' | 'warning' | 'info'>('info')
+
+// 加载数据（带详细调试信息）
+const loadData = async () => {
+  loading.value = true
+  errorMessage.value = ''
+
+  console.log('[MainView] 开始加载新闻数据...')
+
+  try {
+    const [domesticRes, overseasRes, allRes] = await Promise.all([
+      getDomesticNews({ page: 1, size: 6 }),
+      getOverseasNews({ page: 1, size: 6 }),
+      getAllNews({ page: 1, size: 6 })
+    ])
+
+    console.log('[MainView] 国内新闻响应:', domesticRes)
+    console.log('[MainView] 海外新闻响应:', overseasRes)
+    console.log('[MainView] 全部新闻响应:', allRes)
+
+    domesticNews.value = domesticRes.records || []
+    overseasNews.value = overseasRes.records || []
+    allNews.value = allRes.records || []
+
+    console.log('[MainView] 数据加载成功:', {
+      domesticCount: domesticNews.value.length,
+      overseasCount: overseasNews.value.length,
+      allCount: allNews.value.length
+    })
+  } catch (error: any) {
+    console.error('[MainView] 加载数据失败:', error)
+    console.error('[MainView] 错误详情:', {
+      message: error.message,
+      code: error.code,
+      originalError: error.originalError,
+      stack: error.stack
+    })
+    errorMessage.value = error.message || '加载数据失败，请稍后重试'
+    messageType.value = 'error'
+  } finally {
+    loading.value = false
+  }
+}
 
 // 所有DOM操作必须放在onMounted中，确保元素已渲染
 onMounted(() => {
+  // 加载新闻数据
+  loadData()
+
   const menuToggle = document.getElementById('menuToggle')
   const dropdownMenu = document.getElementById('dropdownMenu')
   let menuOpen = false
@@ -212,24 +262,42 @@ onMounted(() => {
   }
 
   userIcon?.addEventListener('click', () => {
-    openLoginModal()
+    if (user.value) {
+      // 已登录，显示退出选项
+      if (confirm('是否退出登录？')) {
+        logout()
+      }
+    } else {
+      openLoginModal()
+    }
   })
   loginModalBackdrop?.addEventListener('click', closeLoginModal)
   loginModalClose?.addEventListener('click', closeLoginModal)
 
-  loginForm?.addEventListener('submit', function (e) {
+  loginForm?.addEventListener('submit', async function (e) {
     e.preventDefault()
     const formData = new FormData(this)
-    const username = (formData.get('username') as string) || '用户'
-    login(username)
-    alert(`登录完成：${username}`)
-    closeLoginModal()
+    const username = formData.get('username') as string
+    const password = formData.get('password') as string
+
+    try {
+      await login(username, password)
+      messageType.value = 'success'
+      errorMessage.value = `登录成功：${username}`
+      closeLoginModal()
+      // 重新加载数据（如果需要）
+      loadData()
+    } catch (error: any) {
+      console.error('登录失败:', error)
+      messageType.value = 'error'
+      errorMessage.value = error.message || '登录失败，请检查用户名和密码'
+    }
   })
 
   registerLink?.addEventListener('click', function (e) {
     e.preventDefault()
     // 跳转到内部注册页面
-    window.location.href = '/register'
+    router.push('/register')
   })
 })
 </script>

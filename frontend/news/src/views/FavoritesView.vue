@@ -29,10 +29,11 @@
       </section>
 
       <section class="fav-list">
-        <article v-if="activeCategory === 'domestic' && domesticList.length === 0" class="empty">
+        <article v-if="loading" class="empty">加载中...</article>
+        <article v-else-if="activeCategory === 'domestic' && domesticList.length === 0" class="empty">
           当前暂无国内收藏，去首页添加吧。
         </article>
-        <article v-if="activeCategory === 'overseas' && overseasList.length === 0" class="empty">
+        <article v-else-if="activeCategory === 'overseas' && overseasList.length === 0" class="empty">
           当前暂无海外收藏，去首页添加吧。
         </article>
 
@@ -42,10 +43,9 @@
           class="news-item"
           @click="jumpToDetail(item)"
         >
-          <img :src="item.cover" alt="收藏新闻" class="news-image" />
           <div class="news-content">
-            <h3 class="news-title">{{ item.title }}</h3>
-            <p class="news-summary">{{ item.summary }}</p>
+            <h3 class="news-title">{{ item.newsTitle }}</h3>
+            <p class="news-summary">{{ item.newsType === 'DOMESTIC' ? '国内' : '海外' }}</p>
           </div>
         </article>
       </section>
@@ -56,46 +56,46 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { getFavorites } from '@/api/favorite'
+import type { FavoriteDTO } from '@/api/favorite'
 
 const router = useRouter()
 const activeCategory = ref<'domestic' | 'overseas'>('domestic')
+const domesticList = ref<FavoriteDTO[]>([])
+const overseasList = ref<FavoriteDTO[]>([])
+const loading = ref(false)
 
-const domesticList = ref([
-  {
-    id: 'd1',
-    title: '国内收藏示例：科技新闻回顾',
-    summary: '您已收藏国内新闻，方便随时查看策略变动与国家政策动态。',
-    cover: 'https://via.placeholder.com/280x160/FF6B6B/FFFFFF?text=国内收藏'
-  },
-  {
-    id: 'd2',
-    title: '国内收藏示例：民生热点速递',
-    summary: '民生类新闻一键收藏，再也不怕错过重要信息。',
-    cover: 'https://via.placeholder.com/280x160/4ECDC4/FFFFFF?text=国内收藏2'
+// 加载收藏数据
+const loadFavorites = async () => {
+  loading.value = true
+  try {
+    const [domesticRes, overseasRes] = await Promise.all([
+      getFavorites({ type: 'DOMESTIC', page: 1, size: 20 }),
+      getFavorites({ type: 'OVERSEAS', page: 1, size: 20 })
+    ])
+    domesticList.value = domesticRes.records || []
+    overseasList.value = overseasRes.records || []
+  } catch (error) {
+    console.error('加载收藏失败:', error)
+  } finally {
+    loading.value = false
   }
-])
+}
 
-const overseasList = ref([
-  {
-    id: 'o1',
-    title: '海外收藏示例：国际合作进程',
-    summary: '海外要闻随身看，知晓国际趋势，洞察市场机遇。',
-    cover: 'https://via.placeholder.com/280x160/45B7D1/FFFFFF?text=海外收藏'
-  }
-])
+onMounted(() => {
+  loadFavorites()
+})
 
 const activeList = computed(() => (activeCategory.value === 'domestic' ? domesticList.value : overseasList.value))
 
 const showMore = () => {
-  // 这里可以继续加载更多收藏或跳转收藏管理页面
   alert('正在展示更多收藏内容...')
 }
 
-const jumpToDetail = (item: { id: string }) => {
-  // 根据需求可对接真实详情页
-  router.push({ path: '/', query: { fav: item.id } })
+const jumpToDetail = (item: FavoriteDTO) => {
+  router.push({ path: '/', query: { fav: item.newsId.toString() } })
 }
 </script>
 
@@ -169,14 +169,6 @@ const jumpToDetail = (item: { id: string }) => {
   border-radius: 10px;
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.news-image {
-  width: 140px;
-  height: 88px;
-  border-radius: 8px;
-  object-fit: cover;
-  flex-shrink: 0;
 }
 
 .news-content {

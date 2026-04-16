@@ -12,19 +12,20 @@
 
     <main class="container history-container">
       <section class="history-header">
-        <p>共 {{ historyList.length }} 条已读记录</p>
-        <button class="clear-btn" @click="clearHistory">清空历史</button>
+        <p v-if="!loading">共 {{ historyList.length }} 条已读记录</p>
+        <p v-else>加载中...</p>
+        <button class="clear-btn" @click="clearHistory" :disabled="loading">清空历史</button>
       </section>
 
       <section class="history-list">
-        <article v-if="historyList.length === 0" class="empty">暂无阅读历史，去首页阅读新闻吧。</article>
+        <article v-if="loading" class="empty">加载中...</article>
+        <article v-else-if="historyList.length === 0" class="empty">暂无阅读历史，去首页阅读新闻吧。</article>
 
         <article v-for="item in historyList" :key="item.id" class="news-item" @click="openNews(item)">
-          <img :src="item.cover" alt="已读新闻" class="news-image" />
           <div class="news-content">
-            <h3 class="news-title">{{ item.title }}</h3>
-            <p class="news-summary">{{ item.summary }}</p>
-            <small class="news-meta">{{ item.category }} · {{ item.readAt }}</small>
+            <h3 class="news-title">{{ item.newsTitle }}</h3>
+            <p class="news-summary">{{ item.newsType }} - {{ item.newsCategory || '未分类' }}</p>
+            <small class="news-meta">阅读时间：{{ item.readAt }}</small>
           </div>
         </article>
       </section>
@@ -33,39 +34,48 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { getHistory, clearHistory as apiClearHistory } from '@/api/history'
+import type { HistoryDTO } from '@/api/history'
 
 const router = useRouter()
+const historyList = ref<HistoryDTO[]>([])
+const loading = ref(false)
 
-const historyList = ref([
-  {
-    id: 'h1',
-    title: '已读：全球经济前瞻',
-    summary: '你在 3 小时前阅读该条新闻，了解最新全球经济走势。',
-    category: '海外',
-    readAt: '2026-03-27 09:20',
-    cover: 'https://via.placeholder.com/280x160/8CC152/FFFFFF?text=阅读历史'
-  },
-  {
-    id: 'h2',
-    title: '已读：国内政策解读',
-    summary: '你在 1 天前阅读，关注政策变化带来的机会。',
-    category: '国内',
-    readAt: '2026-03-26 16:40',
-    cover: 'https://via.placeholder.com/280x160/FF6B6B/FFFFFF?text=阅读历史2'
+// 加载历史记录
+const loadHistory = async () => {
+  loading.value = true
+  try {
+    const res = await getHistory({ page: 1, size: 50 })
+    historyList.value = res.records || []
+  } catch (error) {
+    console.error('加载历史失败:', error)
+  } finally {
+    loading.value = false
   }
-])
+}
 
-const clearHistory = () => {
+const clearHistory = async () => {
   if (confirm('确认清空所有阅读历史？')) {
-    historyList.value = []
+    try {
+      await apiClearHistory()
+      historyList.value = []
+      alert('已清空历史记录')
+    } catch (error) {
+      console.error('清空失败:', error)
+      alert('清空失败，请稍后重试')
+    }
   }
 }
 
-const openNews = (item: { id: string }) => {
-  router.push({ path: '/', query: { history: item.id } })
+const openNews = (item: HistoryDTO) => {
+  router.push({ path: '/', query: { history: item.newsId.toString() } })
 }
+
+onMounted(() => {
+  loadHistory()
+})
 </script>
 
 <style scoped>

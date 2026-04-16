@@ -1,4 +1,13 @@
 <template>
+<!-- 消息提示 -->
+<Message
+  v-if="errorMessage"
+  :type="messageType"
+  :message="errorMessage"
+  :duration="3000"
+  @close="errorMessage = ''"
+/>
+
 <!-- ==================== 顶部导航栏 ==================== -->
   <nav class="top-nav">
     <div class="nav-left">
@@ -117,36 +126,16 @@
         <!-- 新闻内容区域 -->
         <section class="news-content-section">
             <h2 class="section-title">该地区新闻</h2>
-            <div class="news-list" id="newsList">
-                <article class="news-item" data-id="1">
-                    <img src="https://via.placeholder.com/200x130/FF6B6B/FFFFFF?text=国际时政1" alt="国际时政" class="news-image">
-                    <div class="news-content">
-                        <h3 class="news-title">国际时政：多国领导人举行紧急峰会</h3>
-                        <p class="news-summary">近日，多国领导人在国际会议中心举行紧急峰会，就当前国际热点问题展开深入讨论。会议达成多项共识，为维护地区和平稳定奠定基础...</p>
-                    </div>
-                </article>
-                <article class="news-item" data-id="2">
-                    <img src="https://via.placeholder.com/200x130/4ECDC4/FFFFFF?text=民生动态" alt="民生动态" class="news-image">
-                    <div class="news-content">
-                        <h3 class="news-title">海外民生：多国推出惠民新政策</h3>
-                        <p class="news-summary">为应对经济下行压力，多个发达国家相继推出惠民新政策，涵盖医疗、教育、住房等多个领域，受到当地民众广泛欢迎...</p>
-                    </div>
-                </article>
-                <article class="news-item" data-id="3">
-                    <img src="https://via.placeholder.com/200x130/45B7D1/FFFFFF?text=财经资讯" alt="财经资讯" class="news-image">
-                    <div class="news-content">
-                        <h3 class="news-title">国际财经：全球股市震荡调整</h3>
-                        <p class="news-summary">受多重因素影响，全球主要股指近期出现震荡调整。分析师指出，市场正在消化前期涨幅，长期来看仍具备上涨基础...</p>
-                    </div>
-                </article>
-                <article class="news-item" data-id="4">
-                    <img src="https://via.placeholder.com/200x130/F7DC6F/FFFFFF?text=外交动态" alt="外交动态" class="news-image">
-                    <div class="news-content">
-                        <h3 class="news-title">外交动态：双边关系取得新进展</h3>
-                        <p class="news-summary">两国高级别代表团近日互访，就深化各领域合作达成重要共识。此次访问标志着双边关系迈上新台阶，为未来发展开辟广阔空间...</p>
-                    </div>
-                </article>
+            <div v-if="loading" class="news-list">加载中...</div>
+            <div v-else-if="newsList.length > 0" class="news-list" id="newsList">
+                <NewsCard
+                  v-for="item in newsList"
+                  :key="item.id"
+                  :news="item"
+                  :show-actions="true"
+                />
             </div>
+            <div v-else class="news-list">暂无相关新闻</div>
         </section>
 
         <!-- 查看更多按钮 -->
@@ -191,14 +180,49 @@
     </footer>
 </template>
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
+import { getDomesticNews } from '@/api/news'
+import type { NewsDTO } from '@/api/news'
+import NewsCard from '@/components/NewsCard.vue'
+import Message from '@/components/Message.vue'
 
+const router = useRouter()
 // 全局登录状态
-const { user, login } = useAuth()
+const { user, login, logout } = useAuth()
+
+// 新闻数据
+const newsList = ref<NewsDTO[]>([])
+const loading = ref(false)
+const selectedProvince = ref('')
+const selectedCategory = ref('')
+const errorMessage = ref('')
+const messageType = ref<'success' | 'error' | 'warning' | 'info'>('info')
+
+// 加载新闻
+const loadNews = async () => {
+  loading.value = true
+  errorMessage.value = ''
+  try {
+    const res = await getDomesticNews({
+      page: 1,
+      size: 20
+    })
+    newsList.value = res.records || []
+  } catch (error: any) {
+    console.error('加载国内新闻失败:', error)
+    errorMessage.value = error.message || '加载新闻失败，请稍后重试'
+    messageType.value = 'error'
+  } finally {
+    loading.value = false
+  }
+}
 
 // 所有DOM操作必须放在onMounted中，确保组件挂载后元素已渲染
 onMounted(() => {
+  // 加载新闻数据
+  loadNews()
 
   const menuToggle = document.getElementById('menuToggle')
   const dropdownMenu = document.getElementById('dropdownMenu')
@@ -234,24 +258,55 @@ onMounted(() => {
   }
 
   userIcon?.addEventListener('click', () => {
-    openLoginModal()
+    if (user.value) {
+      if (confirm('是否退出登录？')) {
+        logout()
+      }
+    } else {
+      openLoginModal()
+    }
   })
 
   loginModalBackdrop?.addEventListener('click', closeLoginModal)
   loginModalClose?.addEventListener('click', closeLoginModal)
 
-  loginForm?.addEventListener('submit', function (e) {
+  loginForm?.addEventListener('submit', async function (e) {
     e.preventDefault()
     const formData = new FormData(this)
-    const username = (formData.get('username') as string) || '用户'
-    login(username)
-    alert(`登录完成：${username}`)
-    closeLoginModal()
+    const username = formData.get('username') as string
+    const password = formData.get('password') as string
+
+    try {
+      await login(username, password)
+      alert(`登录成功：${username}`)
+      closeLoginModal()
+      loadNews()
+    } catch (error) {
+      alert('登录失败，请检查用户名和密码')
+    }
   })
 
   registerLink?.addEventListener('click', function (e) {
     e.preventDefault()
-    window.location.href = '/register'
+    router.push('/register')
+  })
+
+  // 监听省份选择
+  const regionSelect = document.getElementById('regionSelect') as HTMLSelectElement | null
+  regionSelect?.addEventListener('change', function() {
+    selectedProvince.value = this.value
+    loadNews()
+  })
+
+  // 监听分类标签
+  const categoryTags = document.querySelectorAll('.category-tag')
+  categoryTags.forEach(tag => {
+    tag.addEventListener('click', function() {
+      categoryTags.forEach(t => t.classList.remove('active'))
+      this.classList.add('active')
+      selectedCategory.value = this.getAttribute('data-category') || ''
+      loadNews()
+    })
   })
 })
 </script>

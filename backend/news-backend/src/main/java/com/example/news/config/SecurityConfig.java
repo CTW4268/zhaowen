@@ -34,19 +34,20 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        // 公开接口
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/help/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 
-                        .requestMatchers(HttpMethod.GET, "/news/carousel").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/news/recommend").permitAll()
+                        // 新闻查询接口全部公开
+                        .requestMatchers(HttpMethod.GET, "/news/**").permitAll()
 
-                        .requestMatchers("/news/**").authenticated()
-
+                        // 需要认证的接口
                         .requestMatchers("/favorites/**").authenticated()
                         .requestMatchers("/history/**").authenticated()
                         .requestMatchers("/user/**").authenticated()
 
+                        // 其他请求
                         .anyRequest().permitAll()
                 )
                 .sessionManagement(session ->

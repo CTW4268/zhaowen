@@ -47,7 +47,7 @@ import { useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 
 const router = useRouter()
-const { login } = useAuth()
+const { register } = useAuth()
 
 const username = ref('')
 const password = ref('')
@@ -76,13 +76,18 @@ const validate = () => {
   return true
 }
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   if (!validate()) return
 
-  // 这里可以调用真正的注册 API
-  // 注册成功后做本地登录并返回首页
-  login(username.value)
-  router.push('/')
+  try {
+    // 调用真正的注册 API
+    await register(username.value, password.value)
+    alert('注册成功！')
+    router.push('/auth/register')
+  } catch (error) {
+    console.error('注册失败:', error)
+    alert('注册失败，请检查用户名和密码')
+  }
 }
 
 const goLogin = () => {

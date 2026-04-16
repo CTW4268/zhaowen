@@ -8,6 +8,7 @@ import FavoritesView from '../views/FavoritesView.vue'
 import HistoryView from '../views/HistoryView.vue'
 import HelpCenterView from '../views/HelpCenterView.vue'
 import FeedbackView from '../views/FeedbackView.vue'
+import NewsDetailView from '../views/NewsDetailView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -51,6 +52,12 @@ const router = createRouter({
       path: '/feedback',
       name: 'feedback',
       component: FeedbackView
+    },
+    {
+      path: '/news/:id',
+      name: 'newsDetail',
+      component: NewsDetailView,
+      props: true
     }
   ]
 })

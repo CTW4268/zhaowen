@@ -18,26 +18,11 @@
 
       <section class="faq-section">
         <h2>常见问题</h2>
-        <div class="faq-list">
-          <details class="faq-item">
-            <summary>如何收藏新闻？</summary>
-            <p>在新闻详情页或列表中，点击收藏按钮即可将新闻添加到个人收藏中。</p>
-          </details>
-          <details class="faq-item">
-            <summary>如何查看阅读历史？</summary>
-            <p>点击左上角菜单，选择"阅读历史"即可查看您已阅读的新闻记录。</p>
-          </details>
-          <details class="faq-item">
-            <summary>如何切换国内和海外新闻？</summary>
-            <p>在首页点击"国内"或"海外"按钮，或在顶部导航中选择相应页面。</p>
-          </details>
-          <details class="faq-item">
-            <summary>如何登录账户？</summary>
-            <p>点击右上角用户图标，输入用户名和密码即可登录。</p>
-          </details>
-          <details class="faq-item">
-            <summary>如何注册新账户？</summary>
-            <p>在登录弹窗中点击"立即注册"链接，填写用户名和密码完成注册。</p>
+        <div v-if="loading" class="loading">加载中...</div>
+        <div v-else class="faq-list">
+          <details v-for="(faq, index) in faqList" :key="index" class="faq-item">
+            <summary>{{ faq.question }}</summary>
+            <p>{{ faq.answer }}</p>
           </details>
         </div>
       </section>
@@ -56,7 +41,37 @@
 </template>
 
 <script setup lang="ts">
-// Help center component - no router usage needed for now
+import { ref, onMounted } from 'vue'
+import { getFAQ } from '@/api/help'
+import type { FAQItem } from '@/api/help'
+
+const faqList = ref<FAQItem[]>([])
+const loading = ref(false)
+
+// 加载FAQ数据
+const loadFAQ = async () => {
+  loading.value = true
+  try {
+    const data = await getFAQ()
+    faqList.value = data || []
+  } catch (error) {
+    console.error('加载FAQ失败:', error)
+    // 如果API失败，使用默认数据
+    faqList.value = [
+      { question: '如何收藏新闻？', answer: '在新闻详情页或列表中，点击收藏按钮即可将新闻添加到个人收藏中。' },
+      { question: '如何查看阅读历史？', answer: '点击左上角菜单，选择"阅读历史"即可查看您已阅读的新闻记录。' },
+      { question: '如何切换国内和海外新闻？', answer: '在首页点击"国内"或"海外"按钮，或在顶部导航中选择相应页面。' },
+      { question: '如何登录账户？', answer: '点击右上角用户图标，输入用户名和密码即可登录。' },
+      { question: '如何注册新账户？', answer: '在登录弹窗中点击"立即注册"链接，填写用户名和密码完成注册。' }
+    ]
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  loadFAQ()
+})
 </script>
 
 <style scoped>

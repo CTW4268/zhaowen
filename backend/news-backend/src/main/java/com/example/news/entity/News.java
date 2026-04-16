@@ -4,10 +4,11 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * 新闻实体类
+ * 新闻实体类 - 匹配news-system数据库结构（规范化）
  */
 @Data
 @Entity
@@ -16,61 +17,46 @@ public class News {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(nullable = false, length = 255)
     private String title;
 
     @Column(columnDefinition = "TEXT")
-    private String summary;
-
-    @Column(columnDefinition = "LONGTEXT")
     private String content;
 
     @Column(length = 500)
-    private String coverImage;
+    private String summary;
 
-    @Column(nullable = false, length = 20)
-    @Enumerated(EnumType.STRING)
-    private NewsType type;
+    // 外键关联
+    @Column(name = "author_id")
+    private Integer authorId;
 
-    @Column(length = 50)
-    private String province;
+    @Column(name = "source_id")
+    private Integer sourceId;
 
-    @Column(length = 50)
-    private String region;
+    @Column(name = "country_id")
+    private Integer countryId;
 
-    @Column(length = 50)
-    private String country;
+    @Column(name = "is_domestic")
+    private Boolean isDomestic = false;
 
-    @Column(length = 50)
-    private String category;
+    @Column(name = "publish_time")
+    private LocalDateTime publishTime;
 
-    @Column(length = 100)
-    private String source;
+    @Column(name = "view_num")
+    private Integer viewNum = 0;
 
-    @Column(length = 100)
-    private String author;
+    @Column(name = "like_num")
+    private Integer likeNum = 0;
 
-    @Column(nullable = false)
-    private Integer viewCount = 0;
+    @Column(name = "collect_num")
+    private Integer collectNum = 0;
 
-    @Column(nullable = false)
-    private Boolean isCarousel = false;
-
-    @Column
-    private Integer carouselOrder;
+    @Column(name = "final_weight", precision = 10, scale = 2)
+    private BigDecimal finalWeight = BigDecimal.ZERO;
 
     @CreationTimestamp
-    @Column(updatable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
-
-    @Column
-    private LocalDateTime publishedAt;
-
-    public enum NewsType {
-        DOMESTIC,    // 国内
-        OVERSEAS,    // 海外
-        POLITICS     // 政治
-    }
 }

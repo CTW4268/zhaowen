@@ -85,6 +85,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { submitFeedback as apiSubmitFeedback } from '@/api/feedback'
 
 const feedback = ref({
   type: '',
@@ -104,12 +105,18 @@ const submitFeedback = async () => {
 
   isSubmitting.value = true
 
-  // 模拟提交过程
   try {
-    await new Promise(resolve => setTimeout(resolve, 2000)) // 模拟网络请求
-    console.log('Feedback submitted:', feedback.value)
+    await apiSubmitFeedback({
+      type: feedback.value.type,
+      subject: feedback.value.subject,
+      description: feedback.value.message,
+      contact: feedback.value.contact
+    })
     submitSuccess.value = true
     feedback.value = { type: '', subject: '', message: '', contact: '' }
+    setTimeout(() => {
+      submitSuccess.value = false
+    }, 3000)
   } catch (error) {
     console.error('Feedback submission error:', error)
     alert('提交失败，请稍后重试')

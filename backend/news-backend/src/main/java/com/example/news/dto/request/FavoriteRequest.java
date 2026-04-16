@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
- * 收藏请求 DTO
+ * 收藏请求 DTO - 匹配新的数据结构
  */
 @Data
 public class FavoriteRequest {
@@ -18,6 +18,4 @@ public class FavoriteRequest {
 
     @NotBlank(message = "新闻标题不能为空")
     private String newsTitle;
-
-    private String newsCover;
 }
