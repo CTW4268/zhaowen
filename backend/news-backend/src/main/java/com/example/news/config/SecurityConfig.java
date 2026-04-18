@@ -33,21 +33,20 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
+                // ... existing code ...
                 .authorizeHttpRequests(auth -> auth
-                        // 公开接口
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/help/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 
-                        // 新闻查询接口全部公开
+                        // 新增：允许所有用户访问新闻查询接口（GET请求）
                         .requestMatchers(HttpMethod.GET, "/news/**").permitAll()
 
-                        // 需要认证的接口
                         .requestMatchers("/favorites/**").authenticated()
                         .requestMatchers("/history/**").authenticated()
                         .requestMatchers("/user/**").authenticated()
 
-                        // 其他请求
+
                         .anyRequest().permitAll()
                 )
                 .sessionManagement(session ->

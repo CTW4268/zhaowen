@@ -46,7 +46,7 @@ public class FavoriteService {
      * 添加收藏
      */
     @Transactional
-    public Favorite addFavorite(Long userId, Long newsId, String type, String newsTitle) {
+    public Favorite addFavorite(Long userId, Long newsId, String type, String newsTitle, String newsCover) {
         // 检查是否已收藏
         Optional<Favorite> existing = favoriteRepository.findByUserIdAndNewsId(userId, newsId);
         if (existing.isPresent()) {
@@ -58,6 +58,7 @@ public class FavoriteService {
         favorite.setNewsId(newsId);
         favorite.setNewsType(type);
         favorite.setNewsTitle(newsTitle);
+        favorite.setNewsCover(newsCover);
 
         favorite = favoriteRepository.save(favorite);
         log.info("用户 {} 收藏了新闻 {}", userId, newsId);
@@ -90,6 +91,7 @@ public class FavoriteService {
         dto.setNewsId(favorite.getNewsId());
         dto.setNewsType(favorite.getNewsType());
         dto.setNewsTitle(favorite.getNewsTitle());
+        dto.setNewsCover(favorite.getNewsCover());
         if (favorite.getCreatedAt() != null) {
             dto.setCreatedAt(favorite.getCreatedAt().toString());
         }

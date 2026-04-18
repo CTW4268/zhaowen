@@ -7,7 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 /**
- * 收藏实体类 - 匹配新的数据结构
+ * 收藏实体类
  */
 @Data
 @Entity
@@ -30,6 +30,9 @@ public class Favorite {
 
     @Column(nullable = false, length = 255)
     private String newsTitle;
+
+    @Column(length = 500)
+    private String newsCover;
 
     @CreationTimestamp
     @Column(updatable = false)

@@ -3,6 +3,7 @@ package com.example.news.controller;
 import com.example.news.dto.response.ApiResponse;
 import com.example.news.dto.response.HistoryDTO;
 import com.example.news.dto.response.PageResult;
+import com.example.news.security.UserDetailsImpl;
 import com.example.news.service.HistoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -65,7 +66,11 @@ public class HistoryController {
     /**
      * 从用户名中提取用户 ID
      */
+
     private Long getUserId(UserDetails userDetails) {
+        if (userDetails instanceof UserDetailsImpl impl) {
+            return impl.getId();
+        }
         try {
             return Long.parseLong(userDetails.getUsername());
         } catch (NumberFormatException e) {
@@ -73,3 +78,4 @@ public class HistoryController {
         }
     }
 }
+

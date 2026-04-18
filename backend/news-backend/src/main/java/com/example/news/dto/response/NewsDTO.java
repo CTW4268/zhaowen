@@ -2,37 +2,26 @@ package com.example.news.dto.response;
 
 import lombok.Data;
 
-import java.math.BigDecimal;
-
 /**
- * 新闻响应 DTO - 匹配news-system数据库结构（包含关联信息）
+ * 新闻详情响应 DTO
  */
 @Data
 public class NewsDTO {
 
-    private Integer id;
+    private Long id;
     private String title;
     private String summary;
     private String content;
-
-    // 关联信息
-    private Integer authorId;
-    private String authorName;
-
-    private Integer sourceId;
-    private String sourceName;
-
-    private Integer countryId;
-    private String countryName;
-    private String continent;
-
-    // 类型和统计
-    private Boolean isDomestic;
-    private Integer viewNum;
-    private Integer likeNum;
-    private Integer collectNum;
-    private BigDecimal finalWeight;
-
-    private String publishTime;
+    private String coverImage;
+    private String type;
+    private String province;
+    private String region;
+    private String country;
+    private String category;
+    private String source;
+    private String author;
+    private Integer viewCount;
+    private Boolean isCarousel;
     private String createdAt;
+    private String publishedAt;
 }

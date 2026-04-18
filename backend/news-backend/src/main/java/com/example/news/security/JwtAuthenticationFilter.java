@@ -17,9 +17,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-/**
- * JWT 认证过滤器
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -29,8 +26,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserService userService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, 
-                                    HttpServletResponse response, 
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         try {
             String jwt = getJwtFromRequest(request);
@@ -42,7 +39,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     UserDetails userDetails = userService.loadUserByUsername(username);
 
                     if (jwtTokenProvider.validateToken(jwt, userDetails)) {
-                        UsernamePasswordAuthenticationToken authentication = 
+                        // 提取 userId 并更新到 UserDetails 中
+                        if (userDetails instanceof UserDetailsImpl impl) {
+                            Long userId = jwtTokenProvider.getUserIdFromToken(jwt);
+                            if (userId != null) {
+                                impl.setId(userId);
+                            }
+                        }
+
+                        UsernamePasswordAuthenticationToken authentication =
                                 new UsernamePasswordAuthenticationToken(
                                         userDetails,
                                         null,
@@ -64,9 +69,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    /**
-     * 从请求中提取 JWT Token
-     */
     private String getJwtFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {

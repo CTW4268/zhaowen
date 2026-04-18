@@ -1,6 +1,7 @@
 package com.example.news.repository;
 
 import com.example.news.entity.News;
+import com.example.news.entity.News.NewsType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,51 +9,51 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
- * 新闻数据访问接口 - 匹配news-system数据库结构
+ * 新闻数据访问接口
  */
 @Repository
-public interface NewsRepository extends JpaRepository<News, Integer> {
+public interface NewsRepository extends JpaRepository<News, Long> {
 
     /**
-     * 查询国内新闻（is_domestic = 1）
+     * 分页查询轮播图新闻
      */
-    @Query("SELECT n FROM News n WHERE n.isDomestic = true ORDER BY n.publishTime DESC")
-    Page<News> findDomesticNews(Pageable pageable);
+    List<News> findByIsCarouselTrueOrderByCarouselOrderAsc(Pageable pageable);
 
     /**
-     * 查询海外新闻（is_domestic = 0）
+     * 根据类型分页查询新闻
      */
-    @Query("SELECT n FROM News n WHERE n.isDomestic = false ORDER BY n.publishTime DESC")
-    Page<News> findOverseasNews(Pageable pageable);
+    Page<News> findByType(NewsType type, Pageable pageable);
 
     /**
-     * 根据发布时间排序查询所有新闻
+     * 查询国内新闻（带省份和分类筛选）
      */
-    @Query("SELECT n FROM News n ORDER BY n.publishTime DESC")
-    Page<News> findAllOrderByPublishTimeDesc(Pageable pageable);
+    @Query("SELECT n FROM News n WHERE n.type = 'DOMESTIC' " +
+           "AND (:province IS NULL OR n.province = :province) " +
+           "AND (:category IS NULL OR n.category = :category) " +
+           "ORDER BY n.publishedAt DESC")
+    Page<News> findDomesticNews(@Param("province") String province,
+                                 @Param("category") String category,
+                                 Pageable pageable);
 
     /**
-     * 根据最终权重排序查询新闻
+     * 查询海外新闻（带地区和分类筛选）
      */
-    @Query("SELECT n FROM News n ORDER BY n.finalWeight DESC, n.publishTime DESC")
-    Page<News> findByFinalWeightOrderByPublishTimeDesc(Pageable pageable);
+    @Query("SELECT n FROM News n WHERE n.type = 'OVERSEAS' " +
+           "AND (:region IS NULL OR n.region = :region) " +
+           "AND (:country IS NULL OR n.country = :country) " +
+           "AND (:category IS NULL OR n.category = :category) " +
+           "ORDER BY n.publishedAt DESC")
+    Page<News> findOverseasNews(@Param("region") String region,
+                                 @Param("country") String country,
+                                 @Param("category") String category,
+                                 Pageable pageable);
 
     /**
-     * 根据国家ID查询新闻
+     * 查询政治新闻
      */
-    @Query("SELECT n FROM News n WHERE n.countryId = :countryId ORDER BY n.publishTime DESC")
-    Page<News> findByCountryId(@Param("countryId") Integer countryId, Pageable pageable);
-
-    /**
-     * 根据作者ID查询新闻
-     */
-    @Query("SELECT n FROM News n WHERE n.authorId = :authorId ORDER BY n.publishTime DESC")
-    Page<News> findByAuthorId(@Param("authorId") Integer authorId, Pageable pageable);
-
-    /**
-     * 根据来源ID查询新闻
-     */
-    @Query("SELECT n FROM News n WHERE n.sourceId = :sourceId ORDER BY n.publishTime DESC")
-    Page<News> findBySourceId(@Param("sourceId") Integer sourceId, Pageable pageable);
+    @Query("SELECT n FROM News n WHERE n.type = 'POLITICS' ORDER BY n.publishedAt DESC")
+    Page<News> findPoliticsNews(Pageable pageable);
 }

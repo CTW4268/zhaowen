@@ -29,8 +29,13 @@ public class JwtTokenProvider {
     private long jwtRefreshExpiration;
 
     public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+        Map<String, Object> extraClaims = new HashMap<>();
+        if (userDetails instanceof UserDetailsImpl impl) {
+            extraClaims.put("userId", impl.getId());
+        }
+        return generateToken(extraClaims, userDetails);
     }
+
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         return Jwts.builder()
@@ -53,6 +58,10 @@ public class JwtTokenProvider {
 
     public String getUsernameFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
+    }
+
+    public Long getUserIdFromToken(String token) {
+        return getClaimFromToken(token, claims -> claims.get("userId", Long.class));
     }
 
     public Date getExpirationDateFromToken(String token) {
@@ -97,3 +106,4 @@ public class JwtTokenProvider {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }
+
