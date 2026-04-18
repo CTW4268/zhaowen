@@ -70,41 +70,7 @@ npm run dev
 
 前端服务将在 `http://localhost:5173` 运行
 
-## 📁 项目结构
-
-```
-zhaowen/
-├── backend/                # 后端代码
-│   └── news-backend/      # Spring Boot后端项目
-│       ├── src/
-│       │   ├── main/
-│       │   │   ├── java/com/example/news/
-│       │   │   │   ├── config/        # 配置类
-│       │   │   │   ├── controller/    # 控制器
-│       │   │   │   ├── dto/           # 数据传输对象
-│       │   │   │   ├── entity/        # 实体类
-│       │   │   │   ├── exception/     # 异常处理
-│       │   │   │   ├── repository/    # 数据访问层
-│       │   │   │   ├── security/      # 安全配置
-│       │   │   │   └── service/       # 业务逻辑层
-│       │   │   └── resources/         # 配置文件
-│       │   └── test/                  # 测试代码
-│       └── pom.xml                    # Maven配置
-├── frontend/              # 前端代码
-│   └── news/             # Vue前端项目
-│       ├── src/
-│       │   ├── assets/   # 静态资源
-│       │   ├── components/  # 组件
-│       │   ├── composables/ # 组合式函数
-│       │   ├── router/   # 路由配置
-│       │   ├── stores/   # 状态管理
-│       │   └── views/    # 页面视图
-│       └── package.json  # npm配置
-├── start.sh              # Linux启动脚本
-├── stop.sh               # Linux停止脚本
-├── start.bat             # Windows启动脚本
-├── stop.bat              # Windows停止脚本
-└── README.md             # 项目说明文档
+## 📁 你老冯爆了
 ```
 
 ## 🔧 配置说明
