@@ -21,12 +21,13 @@ export interface FavoriteRequest {
   newsTitle: string
 }
 
-// 分页结果
+// 分页结果 - 匹配后端实际返回结构
 export interface PageResult<T> {
   records: T[]
   total: number
   page: number
   size: number
+  totalPages: number
 }
 
 /**
@@ -34,24 +35,24 @@ export interface PageResult<T> {
  */
 export const getFavorites = (params: {
   type?: string
-  page?: number
-  size?: number
+  page: number
+  size: number
 }) => {
-  return apiClient.get<PageResult<FavoriteDTO>>('/favorites', { params })
+  return apiClient.get<PageResult<FavoriteDTO>>('/favorites/get', { params })
 }
 
 /**
  * 添加收藏
  */
 export const addFavorite = (data: FavoriteRequest) => {
-  return apiClient.post('/favorites', data)
+  return apiClient.post('/favorites/add', data)
 }
 
 /**
  * 取消收藏
  */
-export const removeFavorite = (newsId: number) => {
-  return apiClient.delete(`/favorites/${newsId}`)
+export const removeFavorite = (id: number) => {
+  return apiClient.delete(`/favorites/${id}`)
 }
 
 /**

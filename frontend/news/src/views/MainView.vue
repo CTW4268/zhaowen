@@ -111,9 +111,9 @@
         <section class="politics-section">
             <h2 class="column-title">近期国内外政治大事件展示</h2>
             <div v-if="loading" class="politics-grid">加载中...</div>
-            <div v-else-if="allNews.length > 0" class="politics-grid">
+            <div v-else-if="politicsNews.length > 0" class="politics-grid">
                 <NewsCard
-                  v-for="item in allNews"
+                  v-for="item in politicsNews"
                   :key="item.id"
                   :news="item"
                   :show-actions="true"
@@ -159,10 +159,10 @@
     </footer>
 </template>
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
-import { getDomesticNews, getOverseasNews, getAllNews } from '@/api/news'
+import { getDomesticNews, getOverseasNews, getPoliticsNews } from '@/api/news'
 import type { NewsDTO } from '@/api/news'
 import NewsCard from '@/components/NewsCard.vue'
 import Message from '@/components/Message.vue'
@@ -174,39 +174,58 @@ const { user, login, logout } = useAuth()
 // 响应式数据
 const domesticNews = ref<NewsDTO[]>([])
 const overseasNews = ref<NewsDTO[]>([])
-const allNews = ref<NewsDTO[]>([])
+const politicsNews = ref<NewsDTO[]>([])
 const loading = ref(false)
 const errorMessage = ref('')
 const messageType = ref<'success' | 'error' | 'warning' | 'info'>('info')
 
+// 用于取消未完成的请求（防止竞态条件）
+let abortController: AbortController | null = null
+
 // 加载数据（带详细调试信息）
 const loadData = async () => {
+  // 如果已有请求在进行中，先取消
+  if (abortController) {
+    abortController.abort()
+  }
+  abortController = new AbortController()
+
   loading.value = true
   errorMessage.value = ''
 
   console.log('[MainView] 开始加载新闻数据...')
 
   try {
-    const [domesticRes, overseasRes, allRes] = await Promise.all([
+    const [domesticRes, overseasRes, politicsRes] = await Promise.all([
       getDomesticNews({ page: 1, size: 6 }),
       getOverseasNews({ page: 1, size: 6 }),
-      getAllNews({ page: 1, size: 6 })
+      getPoliticsNews({ page: 1, size: 6 })
     ])
+
+    // 检查是否已被取消
+    if (abortController?.signal.aborted) {
+      return
+    }
 
     console.log('[MainView] 国内新闻响应:', domesticRes)
     console.log('[MainView] 海外新闻响应:', overseasRes)
-    console.log('[MainView] 全部新闻响应:', allRes)
+    console.log('[MainView] 政治新闻响应:', politicsRes)
 
     domesticNews.value = domesticRes.records || []
     overseasNews.value = overseasRes.records || []
-    allNews.value = allRes.records || []
+    politicsNews.value = politicsRes.records || []
 
     console.log('[MainView] 数据加载成功:', {
       domesticCount: domesticNews.value.length,
       overseasCount: overseasNews.value.length,
-      allCount: allNews.value.length
+      politicsCount: politicsNews.value.length
     })
   } catch (error: any) {
+    // 如果是被取消的请求，不显示错误
+    if (error.name === 'AbortError') {
+      return
+    }
+
     console.error('[MainView] 加载数据失败:', error)
     console.error('[MainView] 错误详情:', {
       message: error.message,
@@ -285,8 +304,7 @@ onMounted(() => {
       messageType.value = 'success'
       errorMessage.value = `登录成功：${username}`
       closeLoginModal()
-      // 重新加载数据（如果需要）
-      loadData()
+      // 登录成功后无需重新加载新闻数据
     } catch (error: any) {
       console.error('登录失败:', error)
       messageType.value = 'error'
@@ -299,6 +317,13 @@ onMounted(() => {
     // 跳转到内部注册页面
     router.push('/register')
   })
+})
+
+// 组件卸载时清理
+onUnmounted(() => {
+  if (abortController) {
+    abortController.abort()
+  }
 })
 </script>
 

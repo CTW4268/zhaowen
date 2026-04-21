@@ -20,6 +20,30 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,
+      },
+      '/news': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/auth': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/user': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/history': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/favorites': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/feedback': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
       }
     }
   },

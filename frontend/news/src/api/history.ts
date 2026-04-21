@@ -10,20 +10,21 @@ export interface HistoryDTO {
   readAt: string
 }
 
-// 分页结果
+// 分页结果 - 匹配后端实际返回结构
 export interface PageResult<T> {
   records: T[]
   total: number
   page: number
   size: number
+  totalPages: number
 }
 
 /**
  * 获取用户阅读历史
  */
 export const getHistory = (params: {
-  page?: number
-  size?: number
+  page: number
+  size: number
 }) => {
   return apiClient.get<PageResult<HistoryDTO>>('/history', { params })
 }

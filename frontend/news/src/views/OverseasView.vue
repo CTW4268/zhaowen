@@ -150,7 +150,7 @@
     </footer>
 </template>
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import { getOverseasNews } from '@/api/news'
@@ -171,17 +171,48 @@ const selectedCategory = ref('')
 const errorMessage = ref('')
 const messageType = ref<'success' | 'error' | 'warning' | 'info'>('info')
 
+// 用于取消未完成的请求（防止竞态条件）
+let abortController: AbortController | null = null
+
 // 加载新闻
 const loadNews = async () => {
+  // 如果已有请求在进行中，先取消
+  if (abortController) {
+    abortController.abort()
+  }
+  abortController = new AbortController()
+
   loading.value = true
   errorMessage.value = ''
+
+  console.log('[OverseasView] 开始加载海外新闻...', {
+    region: selectedRegion.value,
+    country: selectedCountry.value,
+    category: selectedCategory.value
+  })
+
   try {
+    // 注意：当前 API 不支持按地区、国家和分类筛选，后续可扩展后端接口支持
+    // 例如：getOverseasNews({ page: 1, size: 20, region: selectedRegion.value, country: selectedCountry.value, category: selectedCategory.value })
     const res = await getOverseasNews({
       page: 1,
       size: 20
     })
+
+    // 检查是否已被取消
+    if (abortController?.signal.aborted) {
+      return
+    }
+
     newsList.value = res.records || []
+
+    console.log('[OverseasView] 数据加载成功，数量:', newsList.value.length)
   } catch (error: any) {
+    // 如果是被取消的请求，不显示错误
+    if (error.name === 'AbortError') {
+      return
+    }
+
     console.error('加载海外新闻失败:', error)
     errorMessage.value = error.message || '加载新闻失败，请稍后重试'
     messageType.value = 'error'
@@ -249,11 +280,14 @@ onMounted(() => {
 
     try {
       await login(username, password)
-      alert(`登录成功：${username}`)
+      messageType.value = 'success'
+      errorMessage.value = `登录成功：${username}`
       closeLoginModal()
-      loadNews()
-    } catch (error) {
-      alert('登录失败，请检查用户名和密码')
+      // 登录成功后无需重新加载新闻数据
+    } catch (error: any) {
+      console.error('登录失败:', error)
+      messageType.value = 'error'
+      errorMessage.value = error.message || '登录失败，请检查用户名和密码'
     }
   })
 
@@ -390,6 +424,13 @@ onMounted(() => {
     console.log('轮播图下一张')
     // 实际项目中这里会切换到下一张图片
   })
+})
+
+// 组件卸载时清理，取消未完成的 API 请求
+onUnmounted(() => {
+  if (abortController) {
+    abortController.abort()
+  }
 })
 </script>
 <style scoped>
